@@ -18,7 +18,7 @@ public class BukanBot {
     public static void main(String[] args) throws InterruptedException {
         jda = JDABuilder.createDefault(BukanBot.token, GatewayIntent.GUILD_EMOJIS_AND_STICKERS, GatewayIntent.GUILD_VOICE_STATES, GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_MEMBERS).build();
         jda.awaitReady();
-        jda.getPresence().setStatus(OnlineStatus.DO_NOT_DISTURB);
+        jda.getPresence().setStatus(OnlineStatus.ONLINE);
         jda.getPresence().setActivity(Activity.watching("absolutely nothing"));
         logger.info("Logged in as " + jda.getSelfUser().getAsTag());
 

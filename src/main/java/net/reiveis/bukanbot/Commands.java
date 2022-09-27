@@ -2,11 +2,13 @@ package net.reiveis.bukanbot;
 
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.reiveis.bukanbot.commands.Music;
 import net.reiveis.bukanbot.commands.TimeTable;
 import net.reiveis.bukanbot.commands.Normals;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -15,9 +17,12 @@ public class Commands extends ListenerAdapter {
 
     @Override
     public void onMessageReceived(MessageReceivedEvent event){
+        if(event.getAuthor().isBot()){
+            return;
+        }
         String content = event.getMessage().getContentRaw();
         logger.info("Message received from " + event.getMessage().getAuthor().getAsTag() + ": " + event.getMessage().getContentRaw());
-        var command = checkRemovePrefixAndSplitArgs(content);
+        ArrayList<String> command = checkRemovePrefixAndSplitArgs(content);
 
         // Checks if the user entered a command or not, since List is empty only when there is no command prefix present
         if(!command.isEmpty()){
@@ -25,17 +30,17 @@ public class Commands extends ListenerAdapter {
         }
     }
 
-    private List<String> checkRemovePrefixAndSplitArgs(String content){
+    private ArrayList<String> checkRemovePrefixAndSplitArgs(String content){
         if(content.length() > 0 && content.charAt(0) == (BukanBot.prefix)){
             content = content.substring(1);
-            return Arrays.asList(content.split(" "));
+            return new ArrayList<>(Arrays.asList(content.split(" ")));
         }
         else {
-            return List.of();
+            return new ArrayList<>(List.of());
         }
     }
 
-    private void handleCommand(List<String> command, MessageReceivedEvent e){
+    private void handleCommand(ArrayList<String> command, MessageReceivedEvent e){
         logger.info("The " + command.get(0) + " command has been invoked!");
         switch (command.get(0)){
             case "info":
@@ -54,6 +59,9 @@ public class Commands extends ListenerAdapter {
                 else {
                     TimeTable.timeTableCommand(e);
                 }
+                break;
+            case "play":
+                Music.handleMusic(e, command);
                 break;
             default:
                 break;
