@@ -4,7 +4,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.reiveis.bukanbot.commands.Music;
 import net.reiveis.bukanbot.commands.TimeTable;
-import net.reiveis.bukanbot.commands.Normals;
+import net.reiveis.bukanbot.commands.Misc;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -45,11 +45,11 @@ public class Commands extends ListenerAdapter {
         switch (command.get(0)){
             case "info":
             case "i":
-                Normals.infoCommand(e);
+                Misc.infoCommand(e);
                 break;
             case "help":
             case "h":
-                Normals.helpCommand(e);
+                Misc.helpCommand(e);
                 break;
             case "jadual":
             case "jd":
@@ -62,6 +62,10 @@ public class Commands extends ListenerAdapter {
                 break;
             case "play":
                 Music.handleMusic(e, command);
+                break;
+            case "disconnect":
+            case "d":
+                Music.handleDisconnect(e);
                 break;
             default:
                 break;

@@ -26,6 +26,7 @@ public class TimeTable {
 
     public static void timeTableCommand(MessageReceivedEvent e, String day) {
         day = Character.toUpperCase(day.charAt(0)) + day.substring(1);
+
         sendTimeTable(e, day);
         logger.info("Sent a timetable to " + e.getAuthor().getAsTag());
     }

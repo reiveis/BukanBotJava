@@ -5,8 +5,8 @@ import net.reiveis.bukanbot.BukanBot;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class Normals {
-    private static final Logger logger = LogManager.getLogger(Normals.class.getName());
+public class Misc {
+    private static final Logger logger = LogManager.getLogger(Misc.class.getName());
     public static void infoCommand(MessageReceivedEvent e){
         EmbedBuilder infoEm = new EmbedBuilder();
         infoEm.setTitle("Welcome to BukanBot Java Edition!");

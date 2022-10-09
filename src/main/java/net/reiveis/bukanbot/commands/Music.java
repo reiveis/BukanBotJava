@@ -1,32 +1,24 @@
 package net.reiveis.bukanbot.commands;
 
-import com.sedmelluq.discord.lavaplayer.container.mp3.Mp3AudioTrack;    // test audio track functionality
-import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
-import com.sedmelluq.discord.lavaplayer.source.AudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
-import com.sedmelluq.discord.lavaplayer.source.local.LocalSeekableInputStream;
 import com.sedmelluq.discord.lavaplayer.source.youtube.*;
-import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.tools.http.HttpContextFilter;
+import com.sedmelluq.discord.lavaplayer.tools.io.HttpClientTools;
 import com.sedmelluq.discord.lavaplayer.tools.io.HttpInterface;
-import com.sedmelluq.discord.lavaplayer.tools.io.SeekableInputStream;
 import com.sedmelluq.discord.lavaplayer.track.*;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.managers.AudioManager;
 import net.reiveis.bukanbot.BukanBot;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.protocol.HttpContext;
-import org.apache.http.protocol.HttpCoreContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -35,10 +27,11 @@ import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import java.io.File;
 import java.util.List;
 
 public class Music {
+    private static final Pattern patternYT = Pattern.compile("http(?:s?):\\/\\/(?:www\\.)?youtu(?:be\\.com\\/watch\\?v=|\\.be\\/)([\\w\\-\\_]*)(&(amp;)?[\\w\\?=]*)?");
+
     private enum SOURCE_SELECTOR {YOUTUBE, YOUTUBE_PLAYLIST, SPOTIFY, SPOTIFY_PLAYLIST, SEARCH};
 
     public static EmbedBuilder musicEm = new EmbedBuilder();
@@ -51,17 +44,26 @@ public class Music {
 
         switch (source){
             case YOUTUBE:
+                try{
+                    track = handleYoutube(command.get(1));
+                }
+                catch(NullPointerException e){
+                    logger.info("Invalid Youtube video URL");
+                }
                 break;
             case YOUTUBE_PLAYLIST:
+
                 break;
             case SPOTIFY:
+                //
                 break;
             case SPOTIFY_PLAYLIST:
+
                 break;
             case SEARCH:
                 command.remove(0);
                 String query = String.join(" ", command);
-                track = handleYoutube(query);
+                track = handleYoutubeSearch(query);
                 break;
             default:
                 track = null;
@@ -80,23 +82,28 @@ public class Music {
         AudioSourceManagers.registerRemoteSources(playerManager);
         AudioPlayer player = playerManager.createPlayer();
 
-
-
         guild.getAudioManager().setSendingHandler(new AudioPlayerSendHandler(player));
         TrackScheduler trackScheduler = new TrackScheduler(player);
         player.addListener(trackScheduler);
 
-        player.playTrack(track);
+        trackScheduler.queue(track);
         logger.info("Playing track: " + track.getInfo().title);
+
+        musicEm.setTitle("Added a song!");
+        musicEm.addField(track.getInfo().title, track.getInfo().author, false);
+        musicEm.setColor(BukanBot.themeColor);
+        event.getChannel().sendMessageEmbeds(musicEm.build()).queue();
+        musicEm.clear();
     }
 
     public static SOURCE_SELECTOR getSource(List<String> command){
-        Pattern patternYT = Pattern.compile("http(?:s?):\\/\\/(?:www\\.)?youtu(?:be\\.com\\/watch\\?v=|\\.be\\/)([\\w\\-\\_]*)(&(amp;)?[\\w\\?=]*)?");
+
         Pattern patternYTPlaylist = Pattern.compile("/^.*(youtu.be\\/|list=)([^#\\&\\?]*).*/");
         Pattern patternSP = Pattern.compile("");
         Pattern patternSPPlaylist = Pattern.compile("");
         Matcher matchYT = patternYT.matcher(command.get(1));
         Matcher matchSP = patternSP.matcher(command.get(1));
+
         Matcher matchYTPlaylist = patternYTPlaylist.matcher(command.get(1));
         Matcher matchSPPlaylist = patternSPPlaylist.matcher(command.get(1));
 
@@ -115,13 +122,39 @@ public class Music {
             return track;
         };
     }
+
     private static YoutubeAudioTrack handleYoutube(String url){
+        CloseableHttpClient client = HttpClientTools.createSharedCookiesHttpBuilder().build();
+        HttpClientContext context = new HttpClientContext();
+        HttpContextFilter contextFilter = new BaseYoutubeHttpContextFilter();
+        HttpInterface httpInterface = new HttpInterface(client, context, true, contextFilter);
+
+        Matcher matcher = patternYT.matcher(url);
+        String videoID = url.substring("https://www.youtube.com/watch?v=".length());
+        System.out.println(videoID);
+        DefaultYoutubeTrackDetailsLoader loader = new DefaultYoutubeTrackDetailsLoader();
+        DefaultYoutubeTrackDetails trackDetails = (DefaultYoutubeTrackDetails) loader.loadDetails(httpInterface, videoID, false);
+
+        return new YoutubeAudioTrack(trackDetails.getTrackInfo(), new YoutubeAudioSourceManager());
+    }
+
+    private static YoutubeAudioTrack handleYoutubeSearch(String query){
         YoutubeSearchProvider searchProvider = new YoutubeSearchProvider();
-        BasicAudioPlaylist audioItem = (BasicAudioPlaylist) searchProvider.loadSearchResult(url, getTrack());
+        //loadSearchResult returns a list instead of an AudioTrack
+        BasicAudioPlaylist audioItem = (BasicAudioPlaylist) searchProvider.loadSearchResult(query, getTrack());
         YoutubeAudioTrack track = (YoutubeAudioTrack) audioItem.getTracks().get(0);
         return track;
     }
 
+    public static void handleDisconnect(MessageReceivedEvent event){
+        AudioManager audioManager = event.getGuild().getAudioManager();
+        audioManager.closeAudioConnection();
+        logger.info("Disconnected from voice channel " + event.getMember().getVoiceState().getChannel().getName());
+        musicEm.addField("Bot has been disconnected", "", false);
+        musicEm.setColor(BukanBot.themeColor);
+        event.getChannel().sendMessageEmbeds(musicEm.build()).queue();
+        musicEm.clear();
+    }
     private static void connectToChannel(MessageReceivedEvent event){
         try {
             VoiceChannel target = (VoiceChannel) event.getMember().getVoiceState().getChannel();

@@ -1,0 +1,84 @@
+{
+  "Monday": [
+    {
+      "time": "11:00",
+      "code": "DDWD2483",
+      "name": "Database",
+      "location": "PA06-416B Makmal Multimedia PSZ",
+      "lecturer": "Pn. Rohani binti Hassan"
+    },
+    {
+      "time": "14:00",
+      "code": "DDWD2763",
+      "name": "Human-Computer Interaction",
+      "location": "Bilik Kuliah 44 (MJIIT) 09.51.01-02",
+      "lecturer": "Pn. Rohani binti Hassan"
+    }
+  ],
+  "Tuesday": [
+    {
+      "time": "11:00",
+      "code": "DDWD2733",
+      "name": "Data Structures and Algorithms",
+      "location": "Makmal Komputer Linux 1 (B101)",
+      "lecturer": "Pn. Rokiah binti Bahari"
+    },
+    {
+      "time": "14:00",
+      "code": "UKQF2XXQ",
+      "name": "Co-curriculum And Service Learning",
+      "location": "Anjung Menara Razak",
+      "lecturer": ""
+    }
+  ],
+  "Wednesday": [
+    {
+      "time": "11:00",
+      "code": "DDWD2763",
+      "name": "Human-Computer Interaction",
+      "location": "Makmal Komputer Mikro 1 (AB100)",
+      "lecturer": "Pn. Rohani binti Hassan"
+    },
+    {
+      "time": "14:00",
+      "code": "DDWD2623",
+      "name": "Object-Oriented Programming Using Java",
+      "location": "Makmal Komputer Mikro 2 (AB100)",
+      "lecturer": "Pn. Norzaharawani binti Busu"
+    }
+  ],
+  "Thursday": [
+    {
+      "time": "09:00",
+      "code": "DDWD2733",
+      "name": "Data Structures and Algorithms",
+      "location": "Dewan Kuliah 3 (DK3)",
+      "lecturer": "Pn. Rokiah binti Bahari"
+    },
+    {
+      "time": "11:00",
+      "code": "DDWD2483",
+      "name": "Database",
+      "location": "Makmal Komputer Teknologi Maklumat (V101)",
+      "lecturer": "Pn. Rohani binti Hassan"
+    },
+    {
+      "time": "14:00",
+      "code": "DDWD2623",
+      "name": "Object-Oriented Programming Using Java",
+      "location": "PA06-416B Makmal Multimedia PSZ",
+      "lecturer": "Pn. Norzaharawani binti Busu"
+    }
+  ],
+  "Friday": [
+
+  ],
+
+  "Saturday": [
+
+  ],
+
+  "Sunday": [
+
+  ]
+}
